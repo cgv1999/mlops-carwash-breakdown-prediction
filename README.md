@@ -95,7 +95,7 @@ Grafana	(http://localhost:3000): дашборды мониторинга
 
 ### Доказательство работы:
 
-https://docs/docker_ps.png
+https://github.com/cgv1999/mlops-carwash-breakdown-prediction/blob/main/docs/docker_ps.png
 
 На скриншоте видно: postgres (healthy), airflow-db (healthy), api (healthy), mlflow, airflow, prometheus, grafana, node-exporter.
 
@@ -113,7 +113,7 @@ curl http://localhost:5000
 
 3. Grafana показывает дашборд:
 
-https://grafana/dashboards/dashboard.png
+https://github.com/cgv1999/mlops-carwash-breakdown-prediction/blob/main/grafana/dashboards/dashboard.png
 
 4. Prometheus собирает метрики с Node Exporter:
 
@@ -129,7 +129,7 @@ docker-compose exec airflow airflow dags list
 
 6. MDD-анализ: сравнение latency:
 
-https://docs/latency_comparison.png
+https://github.com/cgv1999/mlops-carwash-breakdown-prediction/blob/main/docs/latency_comparison.png
 
 Статистический тест показал: t = 1875.08, p-value ≈ 0.000000.
 
@@ -147,7 +147,8 @@ ML-метрики (в порядке приоритета):
 - Precision ≥ 60% - чтобы механики не игнорировали предупреждения
 - F2-score ≥ 0.7 - компромисс с приоритетом Recall
 
-Почему не Accuracy: классы несбалансированы (поломки редки). 
+Почему не Accuracy: классы несбалансированы (поломки редки).
+
 Модель, всегда говорящая "не сломается", даст 95% accuracy при нулевой пользе.
 
 Подробнее: ML-манифест, разделы 1-3.
@@ -230,23 +231,17 @@ ML-метрики (в порядке приоритета):
 - Сгенерированы два набора данных: существующая система (μ=3.5 сек) и улучшенная (μ=2.0 сек), по 500 000 наблюдений
 - Построена визуализация распределений
 
-Сформулированы гипотезы:
+Сформулированы гипотезы - H0: среднее время отклика одинаковое, H1: улучшенная система быстрее;
 
-H0: среднее время отклика одинаковое
+Выбран уровень значимости α = 0.05;
 
-H1: улучшенная система быстрее
+Проведен двусторонний t-тест для независимых выборок: t = 1875.08, p-value ≈ 0.000000;
 
-Выбран уровень значимости α = 0.05
-
-Проведен двусторонний t-тест для независимых выборок
-
-Результат: t = 1875.08, p-value ≈ 0.000000
-
-Вывод: H0 отклоняется, улучшенная система статистически значимо быстрее на 42.9%
+Вывод: H0 отклоняется, улучшенная система статистически значимо быстрее на 42.9%.
 
 Результат оформлен как ADR: docs/adr_latency.md с разделами Context, Hypotheses, Method, Decision, Consequences.
 
-Код анализа: scripts/mdd_analysis.py
+Код анализа: scripts/mdd_analysis.py.
 
 Архитектура:
 
