@@ -1,0 +1,58 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: docker compose version
+
+      - name: Build and start all services
+        run: |
+          docker compose up -d --build
+          sleep 60
+          docker compose ps
+
+      - name: Test API health
+        run: |
+          for i in {1..10}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/health || echo "000")
+            if [ "$STATUS" = "200" ]; then
+              echo "✅ API healthy (HTTP $STATUS)"
+              break
+            fi
+            echo "⏳ Waiting for API... attempt $i"
+            sleep 10
+          done
+          curl -s http://localhost:8001/health
+
+      - name: Test MLflow
+        run: curl -s http://localhost:5000 | grep -q "MLflow" && echo "✅ MLflow OK" || echo "❌ MLflow failed"
+
+      - name: Test Prometheus
+        run: curl -s http://localhost:9090/-/healthy | grep -q "Healthy" && echo "✅ Prometheus OK" || echo "❌ Prometheus failed"
+
+      - name: Test Grafana
+        run: curl -s http://localhost:3000/api/health | grep -q "ok" && echo "✅ Grafana OK" || echo "❌ Grafana failed"
+
+      - name: Show all containers
+        if: always()
+        run: docker compose ps
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs --tail=50
+
+      - name: Tear down
+        if: always()
+        run: docker compose down
