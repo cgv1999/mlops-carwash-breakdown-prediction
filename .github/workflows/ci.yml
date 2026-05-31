@@ -28,22 +28,22 @@ jobs:
           for i in {1..10}; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8001/health || echo "000")
             if [ "$STATUS" = "200" ]; then
-              echo "✅ API healthy (HTTP $STATUS)"
+              echo "API healthy (HTTP $STATUS)"
               break
             fi
-            echo "⏳ Waiting for API... attempt $i"
+            echo "Waiting for API... attempt $i"
             sleep 10
           done
           curl -s http://localhost:8001/health
 
       - name: Test MLflow
-        run: curl -s http://localhost:5000 | grep -q "MLflow" && echo "✅ MLflow OK" || echo "❌ MLflow failed"
+        run: curl -s http://localhost:5000 | grep -q "MLflow" && echo "MLflow OK" || echo "MLflow failed"
 
       - name: Test Prometheus
-        run: curl -s http://localhost:9090/-/healthy | grep -q "Healthy" && echo "✅ Prometheus OK" || echo "❌ Prometheus failed"
+        run: curl -s http://localhost:9090/-/healthy | grep -q "Healthy" && echo "Prometheus OK" || echo "Prometheus failed"
 
       - name: Test Grafana
-        run: curl -s http://localhost:3000/api/health | grep -q "ok" && echo "✅ Grafana OK" || echo "❌ Grafana failed"
+        run: curl -s http://localhost:3000/api/health | grep -q "ok" && echo "Grafana OK" || echo "Grafana failed"
 
       - name: Show all containers
         if: always()
